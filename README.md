@@ -16,7 +16,15 @@ git remote add origin github.com-silmi:silmi-ayra/node-belajar1.git
 git push -u origin main
 
 3. Init dan instal depedency
-
+npm init
+npm install express
+npm install jest --save-dev
+npm install babel-jest --save-dev
+npm install @babel/preset-env --save-dev
+npm install @babel/plugin-transform-runtime --save-dev
+npm install jest supertest @types/jest --save-dev
+npm install --save-dev nodemon
+npm install winston winston-daily-rotate-file
 
 
 
