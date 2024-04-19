@@ -97,7 +97,7 @@ for (const number of numberr) {
 }
 ```
 
-## 2. object
+## 2. Object
 
 1. Bentuk
 
@@ -160,3 +160,232 @@ let arrayKu = [
    `console.log(arrayKu.length) //3`
 
 3. FIND >> mencari isinya
+
+- perintah dasar find
+
+```
+let result = arr.find(function (item, index, array) {
+  // is true is returned, item is retruned and iteration is stopped
+  // for falsy scenario returns undefined
+})
+```
+
+The function is called for elements of the array, one after another :
+Item is the elements, Index is its index, Array is the array itself
+
+- find >> mencari id = 1
+
+```
+let users = [
+  { id: 1, "name": "Primogem" },
+  { id: 2, "name": "Pity" },
+  { id: 3, "name": "IF"}
+];
+
+let userr = users.find(item => item.id == 1)
+console.log(userr.name); // "Primogem"
+
+//Find the index of the first Primogem
+console.log(users.findIndex(user => user.name == 'Primogem')) //0
+```
+
+4. PUSH >> menambahkan object ke dalam array
+
+```
+//ADD >> PUSH
+//Menambahkan object ke dalam array
+const arrayAku = [];
+const objekKu = { nama: "Joko", umur: 30 }
+arrayAku.push(objekKu)
+```
+
+5. Melihat isi dalam array object
+
+```
+//GET
+// Mengakses properti objek dalam array
+const akuArray = [{ nama: "Joko", umur: 38 }, { nama: "Jesika", umur: 25 }]
+console.log(akuArray[0].nama); //Joko
+console.log(akuArray[1].umur); //25
+```
+
+6. Mengubah nilai object tertentu
+
+```
+//UPDATE
+//Mengubah properti object dalam array
+const akuArray = [{ nama: "Joko", umur: 38 }, { nama: "Jesika", umur: 25 }]
+akuArray[0].umur =  35
+console.log(akuArray[0].umur);
+```
+
+7. Menghapus isi salah satu object dalam array
+
+```
+//DELETE
+//Menghapus object dari array berdasarkan index:
+akuArray.splice(0, 1)
+console.log(akuArray);
+
+//Menghapus object dari array berdasarkan properti tertentu:
+const akuArrayy = [{ nama: "Joko", umur: 38 }, { nama: "Jesika", umur: 25 }]
+const indexs = akuArrayy.findIndex(object => object.nama === "Joko")
+akuArrayy.splice(indexs, 1)
+console.log(akuArrayy);
+```
+
+2. MAP
+
+```
+//GET >> MAP >> menampilkan semua array
+// Array object dengan daftar pengguna
+const userss = [
+  { name: "Aice", umur: 20 },
+  { name: "Boby", umur: 24 },
+  { name: "Charlotte", umur: 27 }
+]
+
+// Menggunakan metode map() untuk membuat array baru
+const userStrings = userss.map((user) => {
+  return `${user.name} ${user.umur}`
+})
+
+// Mencetak array baru yang telah di buat
+console.log(userStrings);
+```
+
+3. FILTER >> berdasarkan kriteria tertentu
+
+```
+//GET >> FILTER
+//filter umur diatas 25
+//Menggunakan metode filter() untuk memfilter array object berdasarkan kriteria tertentu:
+const akuArraayy = [{ nama: "Joko", umur: 38 }, { nama: "Jesika", umur: 25 }]
+const newArray = akuArraayy.filter(object => object.umur > 30)
+console.log(newArray);
+
+//GET >> FIND
+//metode find() untuk mencari object dalam array berdasarkan kriteria tertentu:
+const userrss = [
+  { name: "Aice", umur: 20 },
+  { name: "Boby", umur: 24 },
+  { name: "Charlotte", umur: 27 }
+]
+
+//mencari object dengan nama "Charlotte"
+const objectCharlotte = userrss.find(object => object.name === "Charlotte")
+console.log(objectCharlotte);
+
+//Mencari object dengan umur di atas 30
+const objectDiAtas25 = userrss.find(object => object.umur > 25)
+console.log(objectDiAtas25);
+```
+
+4. LOOPING
+
+```
+// Array object dengan data pengguna
+const useerrss = [
+  { name: "Aice", umur: 20 },
+  { name: "Boby", umur: 24 },
+  { name: "Charlotte", umur: 27 }
+]
+
+//menggunakan loop for...of untuk mengiterasi array object
+for (const user of useerrss) {
+  console.log(`Name: ${user.name}, umur: ${user.umur}`);
+}
+```
+
+## 4. FUNCTION
+
+- Function biasa
+
+```
+function greet() {
+  console.log("Hello!");
+}
+
+greet();
+```
+
+- Fungsi dengan parameter
+
+```
+function greet(name) {
+  console.log("Hello " + name + "!");
+}
+
+greet("Furina");
+```
+
+- Fungsi dengan nilai kembalian / return
+
+```
+function add(a, b) {
+  return a + b;
+}
+
+let result = add(2, 4)
+console.log(result);
+```
+
+- Fungsi anonim (tanpa nama)
+
+```
+let greet1 = function (name) {
+  console.log("Hello " + name + "!");
+}
+
+greet1("Hu Tao");
+```
+
+- Fungsi arrow
+
+```
+let greet2 = function (name) {
+  console.log("Hello " + name + "!");
+}
+
+greet2("Kazuha");
+```
+
+## 5. CALLBACK FUNCTION
+
+Function >> Function2 , function 2 dijalankan walau function 1 belum selesai, biasanya operasi asyncroun
+
+```
+function fungsiSatu(name, callback) {
+  console.log('Hello ' + name + '!');
+
+  // Simulasi penundaan 1 detik
+  setTimeout(function () {
+    //fungsi callback >> dipanggil setelah timer 1 detik selesai
+    callback()
+  }, 1000)
+}
+
+function fungsiDua() {
+  console.log('Goodbye!');
+}
+
+// Memanggil fungsi greeting dengan callback farewell
+fungsiSatu('Xiao', fungsiDua);
+```
+
+Operasi ini seperti fungsi pemanggilan data ke server yang akan membutuhkan waktu / tertunda / asynchrounc
+
+```
+async function fetchData() {
+  // Melakukan operasi asynchronous
+  return 'Data';
+}
+```
+
+```
+async function fetchData() {
+  let result = await fetch('https://api.example.com/data');
+  let data = await result.json();
+  return data;
+}
+```
