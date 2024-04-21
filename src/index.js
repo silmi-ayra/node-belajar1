@@ -1,9 +1,5 @@
 //src/index.js
-// a. Import library Framework express
-import express from "express";
-
-// b. Membuat object app dari express function
-export const app = express();
+import { app } from "./application.js";
 
 // c. Definisikan PORT sebagai variable,
 // sehingga mudah menggantinya jika diperlukan

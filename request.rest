@@ -1,0 +1,4 @@
+//request.rest
+
+### 1. Contoh : Endpoint API : GET '/'
+GET http://localhost:3000/
