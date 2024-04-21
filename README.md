@@ -94,3 +94,67 @@ coverage
 ```
 
 ## 2. Mengenal express JS
+
+ExpressJS adalah salah satu Web Framework OpenSource paling populer di NodeJS
+
+### Object App dari Express
+
+`export const app = express();`
+
+Object app pada Express adalah inti dari aplikasi Express. Dengan objct ini, Anda dapat membuat rute, menangani permintaan HTTP, mengatur middleware, dan berbagai fungsi lainnya yang terkait dengan pengaturan dan penanganan aplikasi web
+
+Berikut adalah beberapa contoh penggunaan umum object app pada Express:
+
+1. Membuat Rute : Anda dapat menggunakan metode `app.get()`, `app.post()`, `app.put()`, `app.delete()`, dll, untuk menentukan rute HTTP dan menangani permintaan yang sesuai.
+
+```
+app.get('/', function(req, res) {
+  res.send('Hello World!');
+});
+```
+
+2. Mengatur Middleware : Middleware adalah fungsi-fungsi yang dipanggil sebelum penanganan permintaan akhir. Dengan Express, Anda dapat menggunakan metode `app.use()` untuk mengatur middleware.
+
+```
+app.use(express.json()); // Middleware untuk menangani JSON data
+```
+
+3. Menjalankan Server: Seperti yang Anda lihat dalam potongan kode sebelumnya, Anda menggunakan objek app untuk memanggil metode `listen()` untuk memulai server dan mendengarkan koneksi masuk.
+
+```
+app.listen(PORT, function () {
+  console.log(`Server berjalan di port ${PORT}`);
+});
+```
+
+### Application :: a.import library >> b.app object >> c.port >> d.listen
+
+```
+//src/index.js
+// a. Import library Framework express
+import express from "express";
+
+// b. Membuat object app dari express function
+export const app = express();
+
+// c. Definisikan PORT sebagai variable,
+// sehingga mudah menggantinya jika diperlukan
+const PORT = process.env.PORT || 3000;
+
+// d. Metode app.listen untuk memulai sebuah server dan mendengarkan koneksi masuk pada port
+//app.listen(PORT, callback)
+//() => {...}: arrow function, used as the callback function. logs a message to the console
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
+});
+```
+
+### Jalankan Server : `npm run dev`
+
+## 3. Basic Testing
+
+Belajar membuat endpoint request dan response
+
+1. Endpoint GET http://localhost:3000/ > Request => Response send String
+
+Response Body Success :
