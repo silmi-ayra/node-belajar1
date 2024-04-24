@@ -2,3 +2,15 @@
 
 ### 1. Contoh : Endpoint API : GET '/'
 GET http://localhost:3000/
+
+### 2. Contoh Endpoint API >> GET /oby
+GET http://localhost:3000/oby
+
+### 3. POST http://localhost:3000/api/pasien
+POST http://localhost:3000/api/pasien
+Content-Type: application/json
+
+{
+  "nama" : "Tutik",
+  "alamat": "Semarang"
+}

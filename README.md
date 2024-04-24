@@ -256,3 +256,241 @@ app.get('/', (req, res) => {
 ### 1. Contoh : Endpoint API : GET '/'
 GET http://localhost:3000/
 ```
+
+- melakukan pengetesan dengan request.rest
+
+Unit Test adalah callback function
+
+```
+1. fungsi testing : describe >> it
+describe('Nama Test', callback1)
+callback1 >> () => {it('Nama Sub Test', callback2)}
+callback2 >> async()=>{...}
+
+describe("Test1", () => {
+  it("Test 1.a", async() => {
+    expect(...).toBe(...);
+  });
+  it("Test 1.b", async() => {
+    expect(...).toBe(...);
+  });
+});
+
+2. fungsi testing : describe >> test
+describe('Nama Test', callback1)
+callback1 >> () => {test('Nama Sub Test', callback2)}
+callback2 >> async()=>{...}
+
+describe("Test1", () => {
+  test("Test 1.a", async() => {
+    expect(...).toBe(...);
+  });
+  test("Test 1.b", async() => {
+    expect(...).toBe(...);
+  });
+});
+```
+
+Unit Test :
+
+```
+//test/app.test.js
+
+const request = require('supertest');
+const { app } = require('../src/application');
+
+// a. fungsi testing : describe >> it
+describe('TEST GET No 1 dan No 3', () => {
+  //1. TEST No 1 >> GET http://localhost:3000/
+  it('TEST GET http://localhost:3000/', async () => {
+    // b. lakukan request, GET "/" dan tangkap hasilnya ke variable response
+    const response = await request(app)
+      .get('/');
+    // c. Jika request berhasil ke server maka status response = 200
+    expect(response.status).toBe(200);
+    // d. Periksa isi response seharusnya 'Hello World!'
+    expect(response.text).toBe('Hello World!');
+  });
+});
+
+// Jalankan test
+// npx jest app.test.js
+```
+
+4. Basic Routing
+
+### 2. Endpiont GET http://localhost:3000/oby > Request => Response json Object
+
+- end point GET http://localhost:3000/oby
+
+Response Body Success :
+
+```
+{
+  "message": "GET Data Pasien Sukses",
+  "data": {
+    "nama": "Afin",
+    "alamat": "Semarang"
+  }
+}
+```
+
+```
+//src/application.js
+
+// a. Import library Framework express
+import express from "express";
+
+// b. Membuat object app dari express function
+export const app = express();
+
+// e. Menjalankan Middleware app.use menangani data json
+app.use(express.json())
+
+// f. Membuat Rute >> app.get(Route, callback) >> (req, res) => {...}
+// 1. Contoh : Endpoint API : GET '/'
+app.get('/', (req, res) => {
+  console.log('Hello World requested');
+  res.send('Hello World!')
+})
+
+// 2. Contoh Endpoint API >> GET /oby >> Response Object dg router
+// membuat object router dari express
+export const router = express.Router();
+// jalankan middleware router
+app.use(router)
+// data object yang akan di kirim ke respon json
+const dtPasien = {
+  nama: "Afin",
+  alamat: "Semarang"
+}
+//routing untuk http://localhost:3000/oby
+router.get('/oby', (req, res, next) => {
+  // response json data
+  res.json({
+    message: 'GET Data Pasien Sukses',
+    data: dtPasien
+  })
+})
+```
+
+- test rest
+
+```
+### 2. Contoh Endpoint API >> GET /oby
+GET http://localhost:3000/oby
+```
+
+- unit test
+
+```
+//Test GET http://localhost:3000/oby
+// a. fungsi testing : test
+test("TEST GET http://localhost:3000/oby", async () => {
+  // b. lakukan request, GET "/oby" dan tangkap hasilnya ke variable response
+  const response = await request(app)
+    .get("/oby");
+  // c. Cek response Object >> body >> toEqual (sama)
+  expect(response.body).toEqual({
+    message: 'GET Data Pasien Sukses',
+    data: {
+      nama: "Afin",
+      alamat: "Semarang"
+    }
+  });
+})
+```
+
+## 3. Req Body >> Response Body
+
+- endpoint POST http://localhost:3000/api/pasien
+
+Request Body :
+
+```json
+Content-Type: application/json
+
+{
+  "nama" : "Silmi",
+  "alamat": "Karangawen"
+}
+```
+
+Response Body Success :
+
+```json
+{
+  "message": "POST Data Pasien Sukses",
+  "data": {
+    "nama": "Silmi",
+    "alamat": "Karangawen"
+  }
+}
+```
+
+```
+// 3. Contoh Endpoint API >> POST /api/pasien >> Req Body >> Res Body
+// Membuat Rute >> app.post(Route, callback) >> (req,res) => {res.json({ ... })}
+router.post('/pasien', (req, res, next) => {
+  // kirim json >> data berasal dari request body
+  res.json({
+    message: 'POST Data Pasien Sukses',
+    data: req.body
+  })
+})
+app.use("/api", router)
+```
+
+- request test
+
+```
+### 3. POST http://localhost:3000/api/pasien
+POST http://localhost:3000/api/pasien
+Content-Type: application/json
+
+{
+  "nama" : "Tutik",
+  "alamat": "Semarang"
+}
+```
+
+- unit test
+
+```
+// a. fungsi testing : describe >> it
+describe('TEST GET No 1 dan No 3', () => {
+  //1. TEST No 1 >> GET http://localhost:3000/
+  it('TEST GET http://localhost:3000/', async () => {
+    // b. lakukan request, GET "/" dan tangkap hasilnya ke variable response
+    const response = await request(app)
+      .get('/');
+    // c. Jika request berhasil ke server maka status response = 200
+    expect(response.status).toBe(200);
+    // d. Periksa isi response seharusnya 'Hello World!'
+    expect(response.text).toBe('Hello World!');
+  });
+  // 3. test POST http://localhost:3000/api/pasien
+  it('POST http://localhost:3000/api/pasien', async () => {
+    // b. buat variable data body yang akan dikirim
+    const dataKirim = {
+      "nama": "Tutik",
+      "alamat": "Semarang"
+    }
+    // c. lakukan request, POST "/api/pasien" dan tangkap hasilnya ke variable response
+    const response = await request(app)
+      //kirim post
+      .post('/api/pasien')
+      //kirim send body
+      .send(dataKirim);
+    //d. Jika request berhasil ke server maka status response = 200
+    expect(response.status).toBe(200);
+    //e. respose body yang diharapkan adalah sama dengan data berikut
+    expect(response.body).toEqual({
+      message: 'POST Data Pasien Sukses',
+      data: dataKirim
+    });
+  });
+});
+```
+
+## 4. Membuat EndPoint CRUD Dokumentasi
