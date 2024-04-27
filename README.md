@@ -493,4 +493,111 @@ describe('TEST GET No 1 dan No 3', () => {
 });
 ```
 
-## 4. Membuat EndPoint CRUD Dokumentasi
+pindah ke branch api-object
+
+## 4. Membuat EndPoint CRUD Dokumentasi >> Object
+
+Dokumentasi pada file `.\docs\siswa.md` >> CRUD
+
+```
+1. READ : Endpoint : GET /api/siswa
+2. READ : Endpoint : GET /api/siswa/:id
+3. CREATE : Endpoint : POST /api/siswa
+4. DELETE : Endpoint : DELETE /api/siswa/:id
+5. UPDATE : Endpoint : PUT /api/siswa/:id
+```
+
+## 5. GET Data SEARCH ALL (READ)
+
+- API SPEC `//docs/siswa.md`
+
+Endpoint: GET /api/siswa
+
+Response Body Success :
+
+```
+{
+  "data": [
+    {
+      "id": 1,
+      "first_name": "Edy",
+      "last_name": "Coleee",
+      "email": "edycoleee@gmail.com",
+      "phone": "78932817514"
+    },
+    {
+      "id": 2,
+      "first_name": "Tutik",
+      "last_name": "Sulasmi",
+      "email": "ttkslsm@gmail.com",
+      "phone": "2131251345574"
+    }
+  ]
+}
+```
+
+- Endpoint
+
+install uuid >> npm install uuid
+
+```
+//src/siswa.js
+import express from "express";
+import { v4 as uuid } from 'uuid';
+
+//membuat siswa router dari express router > export
+export const SiswaRouter = express.Router();
+
+// 0. MOCKUP DATA OBYEK (DATA SEMENTARA)
+let dbDataSiswa = [
+  {
+    "id": 1,
+    "first_name": "Edy",
+    "last_name": "Coleee",
+    "email": "edycoleee@gmail.com",
+    "phone": "78932817514"
+  },
+  {
+    "id": 2,
+    "first_name": "Tutik",
+    "last_name": "Sulasmi",
+    "email": "ttkslsm@gmail.com",
+    "phone": "2131251345574"
+  }
+]
+
+// 1. READ : Endpoint : GET /api/siswa
+SiswaRouter.get('/', (req, res, next) => {
+  //kembalikan respon berupa json data siswa
+  res.json({ data: dbDataSiswa })
+})
+```
+
+- Jalankan siswa Router ke middleware application.js
+
+```
+//src/application.js
+import express from "express";
+import { SiswaRouter } from "./siswa.js";
+
+===================================================
+===================================================
+
+// Jalankan siswa router sebagai middleware router
+router.use("/siswa", SiswaRouter)
+
+app.use("/api", router)
+```
+
+- Request.rest Test
+
+```
+### 6. GET Data SEARCH ALL (READ)
+GET http://localhost:3000/api/siswa
+```
+
+- Unit Test
+
+```
+
+```

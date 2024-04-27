@@ -14,3 +14,6 @@ Content-Type: application/json
   "nama" : "Tutik",
   "alamat": "Semarang"
 }
+
+### 6. GET Data SEARCH ALL (READ)
+GET http://localhost:3000/api/siswa
