@@ -592,8 +592,239 @@ app.use("/api", router)
 - Request.rest Test
 
 ```
-### 6. GET Data SEARCH ALL (READ)
+### 4. GET Data SEARCH ALL (READ)
 GET http://localhost:3000/api/siswa
+```
+
+- Unit Test
+
+```
+//test/siswa.test.js
+const request = require('supertest');
+const { app } = require('../src/application');
+
+describe('TEST GET Endpoint 1', () => {
+  //data yang untuk membandingkan hasil test >> salah satu object dari response
+  // kita coba data mockup object dengan id : 1
+  const dataTest = {
+    "id": "1",
+    "first_name": "Edy",
+    "last_name": "Coleee",
+    "email": "edycoleee@gmail.com",
+    "phone": "78932817514"
+  }
+
+  //1. GET http://localhost:3000/api/siswa
+  it('GET Data SEARCH ALL (READ)', async () => {
+    // kirim request ke server GET http://localhost:3000/api/siswa
+    const getDataResponse = await request(app).get('/api/siswa');
+    //cek log data response
+    console.log(getDataResponse.body.data);
+    // Memeriksa response status = 200
+    expect(getDataResponse.status).toBe(200);
+    // Memeriksa panjang array lebih dari 1 object panjangnya
+    expect(getDataResponse.body.data.length).toBeGreaterThan(0);
+    // Memeriksa isi array apakah ada object seperti dataTest
+    expect(getDataResponse.body.data).toEqual(expect.arrayContaining([dataTest]));
+  })
+})
+```
+
+## 6. GET Data / id (READ)
+
+- API SPEC `//docs/siswa.md`
+
+READ : Endpoint : GET /api/siswa/:id
+
+Response Body Success :
+
+```
+{
+  "data": {
+    "id": 1,
+    "first_name": "Edy",
+    "last_name": "Coleee",
+    "email": "edycoleee@gmail.com",
+    "phone": "78932817514"
+  }
+}
+```
+
+- Endpoint
+
+```
+// 2. READ : Endpoint : GET /api/siswa/:id >> menggunakan request.params.id
+SiswaRouter.get('/:id', (req, res, next) => {
+  //Panggil Fungsi Get Siswa by ID dengan mengirim id = req.params.id
+  const dtSiswa = getdbSiswaId(req.params.id)
+  //Jika data Kosong kirim pesan error
+  if (!dtSiswa || dtSiswa.length === 0) {
+    // kirimkan respod status 404 dan json
+    return res.status(404).json({ "errors": "Siswa is not found" })
+  }
+  //Jika data tdk kosong kirim respon datanya
+  res.json({ data: dtSiswa })
+})
+
+//Fungsi Get Siswa by ID ke object mockup database >> dbDataSiswa
+const getdbSiswaId = (id) => {
+  //return dbDataSiswa.find((siswa) => siswa.id === parseInt(id))
+  // cari siswa di dbDataSiswa deengan siswa.id = id >> return hasilnya
+  return dbDataSiswa.find((siswa) => siswa.id === id)
+}
+```
+
+- Request.rest Test
+
+```
+### 5. GET Data /id (READ)
+GET http://localhost:3000/api/siswa/1
+```
+
+- Unit Test
+
+## 7. CREATE : Endpoint : POST /api/siswa
+
+- API SPEC `//docs/siswa.md`
+
+CREATE : Endpoint : POST /api/siswa
+
+Response Body Success :
+
+```
+{
+  "data": {
+    "first_name": "Edy",
+    "last_name": "Coleee",
+    "email": "edycoleee@gmail.com",
+    "phone": "78932817514",
+    "id": "3526t633452134-4262-5xvfgy357y4"
+  }
+}
+```
+
+- Endpoint
+
+```
+//3. CREATE : Endpoint : POST /api/siswa >> ambil req body >> simpan ke data siswa
+SiswaRouter.post('/', (req, res, next) => {
+  //ambil data dari request.body
+  const dataReq = req.body;
+  //buat id uniq dengan bantuan uuid
+  const id = uuid()
+  //Fungsi utk masukkan data kedalam data siswa >>  push array object
+  const AddDtSiswa = (data) => {
+    dbDataSiswa.push({ ...data, id })
+    // log data hasilnya
+    console.log(dbDataSiswa);
+  }
+
+  //Jalankan Fungsi dan masukkan variable dari body
+  AddDtSiswa(dataReq)
+  //Get data siswa berdasarkan id yang sudah di buat tadi > jika sukses maka akan dapat datanya
+  const dataRespon = getdbSiswaId(id)
+  //kirim sebagai respon json data yang akan di dapat
+  res.json({ data: dataRespon })
+})
+```
+
+- Request.rest Test
+
+```
+### 6. POST Data (CREATE)
+POST http://localhost:3000/api/siswa
+Content-Type: application/json
+
+{
+  "first_name": "Silmi",
+  "last_name": "Ayra",
+  "email": "slmaania@gmail.com",
+  "phone": "9526459502334"
+}
+```
+
+- Unit Test
+
+```
+// 3. POST http://localhost:3000/api/siswa
+  it('POST Data (CREATE)', async () => {
+    //data request body yang akan dikirim
+    const dataKirim = {
+      "first_name": "Silmi",
+      "last_name": "Ayra",
+      "email": "slmaania@gmail.com",
+      "phone": "9526459502334"
+    }
+
+    const response = await request(app)
+      //kirim request POST http://localhost:3000/api/siswa
+      .post('/api/siswa')
+      //kirim data kedalam request body
+      .send(dataKirim)
+    //response status sama 200
+    expect(response.status).toBe(200)
+    // Memeriksa bahwa respons adalah sebuah objek
+    expect(response.body.data).toBeInstanceOf(Object);
+    // Memeriksa apakah objek mengandung nilai tertentu "email": "slmaania@gmail.com"
+    expect(response.body.data).toEqual(expect.objectContaining({ "email": "slmaania@gmail.com" }))
+  })
+```
+
+## 8. DELETE Data /id (DELETE)
+
+- API SPEC `//docs/siswa.md`
+
+DELETE : Endpoint : DELETE /api/siswa/:id
+
+Response Body Success :
+
+```json
+{
+  "data": [
+    {
+      "id": "2",
+      "first_name": "Nafi",
+      "last_name": "Dhafin",
+      "email": "nidhan@gmail.com",
+      "phone": "785285043806"
+    }
+  ]
+}
+```
+
+- Endpoint
+
+```
+// 4. DELETE : Endpoint : DELETE /api/siswa/:id >> filter data yang bukan id(req.params.id) yang dikirim
+SiswaRouter.delete('/:id', (req, res, next) => {
+  //cari apakah id data siswa tersebut ada di data siswa >> req.params.id
+  const dtSiswa = getdbSiswaId(req.params.id)
+  //tampilkan di log
+  console.log(dtSiswa);
+  //jika data siswa tidak ketemu atau array isinya 0
+  if (!dtSiswa || dtSiswa.length === 0) {
+    //kirim status 404 dan pesan error
+    return res.status(404).json({ "errors": "Siswa is not found" });
+  } else {
+    //jika datanya di temukan
+    console.log("delete");
+    // Fungsi delete dataSiswa >> filter data yang dataSiswa.id tidak sama dengan id
+    const deldbSiswaId = (id) => {
+      dbDataSiswa = dbDataSiswa.filter((dtSiswa) => dtSiswa.id !== id)
+    }
+    //panggil fungsi delete dengan mengirimkan id > req.params.id
+    deldbSiswaId(req.params.id)
+    //kirim response 200 dan json data siswa sisanya setelah di filter
+    return res.status(200).json({ "data": dbDataSiswa })
+  }
+})
+```
+
+- Request.rest Test
+
+```
+### 7. DELETE Data /id (DELETE)
+DELETE http://localhost:3000/api/siswa/1
 ```
 
 - Unit Test

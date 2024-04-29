@@ -15,5 +15,22 @@ Content-Type: application/json
   "alamat": "Semarang"
 }
 
-### 6. GET Data SEARCH ALL (READ)
+### 4. GET Data SEARCH ALL (READ)
 GET http://localhost:3000/api/siswa
+
+### 5. GET Data /id (READ)
+GET http://localhost:3000/api/siswa/1
+
+### 6. POST Data (CREATE)
+POST http://localhost:3000/api/siswa
+Content-Type: application/json
+
+{
+  "first_name": "Silmi",
+  "last_name": "Ayra",
+  "email": "slmaania@gmail.com",
+  "phone": "9526459502334"
+}
+
+### 7. DELETE Data /id (DELETE)
+DELETE http://localhost:3000/api/siswa/1
