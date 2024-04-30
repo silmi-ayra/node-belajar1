@@ -93,3 +93,33 @@ SiswaRouter.delete('/:id', (req, res, next) => {
     return res.status(200).json({ "data": dbDataSiswa })
   }
 })
+
+// 5. UPDATE : Endpoint : PUT /api/siswa/:id
+SiswaRouter.put('/:id', (req, res, next) => {
+  //mengambil data body untuk sebagai data update 
+  const bodySiswa = req.body;
+  //mengambil data param sebagai id data yang akan di update 
+  const idEdit = req.params.id;
+  //membuat fungsi update data siswa
+  const updatedbSiswa = (id, dataSiswa) => {
+    //cari data yang id nya sesuai dengan map
+    dbDataSiswa = dbDataSiswa.map(dtSiswa => {
+      // jika id data sesuai
+      if (dtSiswa.id === id) {
+        // update data dengan data yang di kirim dari body
+        dtSiswa.first_name = dataSiswa.first_name
+        dtSiswa.last_name = dataSiswa.last_name
+      }
+      // kembalikan datanya
+      return dtSiswa
+    })
+    //satukan dengan semua data siswa
+    return dbDataSiswa
+  }
+  // panggil fungsi data siswa dengan mengirim parameter id dan body
+  updatedbSiswa(idEdit, bodySiswa)
+  //cari data siswa dengan idEdit
+  const dataRespon = getdbSiswaId(idEdit)
+  //kirimkan respon json data yang telah di edit dari hasil pencarian
+  res.json({ data: dataRespon })
+})

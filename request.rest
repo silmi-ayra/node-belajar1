@@ -34,3 +34,14 @@ Content-Type: application/json
 
 ### 7. DELETE Data /id (DELETE)
 DELETE http://localhost:3000/api/siswa/1
+
+### 8. PUT Data /id (UPDATE)
+PUT http://localhost:3000/api/siswa/1
+Content-Type: application/json
+
+{
+  "first_name": "Nafi",
+  "last_name": "Dhafin",
+  "email": "nidhan@gmail.com",
+  "phone": "785285043806"
+}

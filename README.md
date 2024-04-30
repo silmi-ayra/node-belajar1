@@ -830,5 +830,112 @@ DELETE http://localhost:3000/api/siswa/1
 - Unit Test
 
 ```
+// 4. DELETE http://localhost:3000/api/siswa/1
+it('DELETE Data by id (DELETE)', async () => {
+  // kirimkan request DELETE http://localhost:3000/api/siswa/1 dan tangkap hasilnya > getDataResp
+  const getDataResponse = await request(app).delete('/api/siswa/1')
+  //tampilkan di log
+  console.log(getDataResponse);
+  //jika datanya didele maka response status 200
+  expect(getDataResponse.status).toBe(200)
+  // Memeriksa isi array tidak mengandung object tertentu
+  expect(getDataResponse.body.data).not.toEqual(expect.arrayContaining([dataTest]))
+})
+```
 
+## 9. PUT Data /id (UPDATE)
+
+RESTART SERVER DULU
+
+- API SPEC `//docs/siswa.md`
+
+UPDATE : Endpoint : PUT /api/siswa/:id
+
+Response Body Success :
+
+```
+{
+  "data": {
+      "id": "1",
+      "first_name": "Nafi",
+      "last_name": "Dhafin",
+      "email": "nidhan@gmail.com",
+      "phone": "785285043806"
+    }
+}
+```
+
+- Endpoint
+
+```
+// 5. UPDATE : Endpoint : PUT /api/siswa/:id
+SiswaRouter.put('/:id', (req, res, next) => {
+  //mengambil data body untuk sebagai data update
+  const bodySiswa = req.body;
+  //mengambil data param sebagai id data yang akan di update
+  const idEdit = req.params.id;
+  //membuat fungsi update data siswa
+  const updatedbSiswa = (id, dataSiswa) => {
+    //cari data yang id nya sesuai dengan map
+    dbDataSiswa = dbDataSiswa.map(dtSiswa => {
+      // jika id data sesuai
+      if (dtSiswa.id === id) {
+        // update data dengan data yang di kirim dari body
+        dtSiswa.first_name = dataSiswa.first_name
+        dtSiswa.last_name = dataSiswa.last_name
+      }
+      // kembalikan datanya
+      return dtSiswa
+    })
+    //satukan dengan semua data siswa
+    return dbDataSiswa
+  }
+  // panggil fungsi data siswa dengan mengirim parameter id dan body
+  updatedbSiswa(idEdit, bodySiswa)
+  //cari data siswa dengan idEdit
+  const dataRespon = getdbSiswaId(idEdit)
+  //kirimkan respon json data yang telah di edit dari hasil pencarian
+  res.json({ data: dataRespon })
+})
+```
+
+- Request.rest Test
+
+```
+### 8. PUT Data /id (UPDATE)
+PUT http://localhost:3000/api/siswa/1
+Content-Type: application/json
+
+{
+  "first_name": "Nafi",
+  "last_name": "Dhafin",
+  "email": "nidhan@gmail.com",
+  "phone": "785285043806"
+}
+```
+
+- Unit Test
+
+```
+// 5. PUT http://localhost:3000/api/siswa/1
+  it('POST Data (CREATE)', async () => {
+    // kirimkan data yang akan di edit dalam body
+    const dataKirim = {
+      "first_name": "Nafi",
+      "last_name": "Dhafin",
+      "email": "nidhan@gmail.com",
+      "phone": "785285043806"
+    }
+    const response = await request(app)
+      //kirim request PUT http://localhost:3000/api/siswa/1 > id = 1
+      .put('/api/siswa/1')
+      //kirimkan data body
+      .send(dataKirim)
+    console.log("response.body :", response.body);
+    //hasil status jika sukses = 200
+    expect(response.status).toBe(200)
+    // Memeriksa apakah objek mengandung nilai tertentu
+    expect(response.body.data).toEqual(expect.objectContaining({ "first_name": "Nafi" }));
+    expect(response.body.data).toEqual(expect.objectContaining({ "last_name": "Dhafin" }));
+  })
 ```

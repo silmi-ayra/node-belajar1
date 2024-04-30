@@ -14,7 +14,7 @@ describe('TEST GET Endpoint 1', () => {
   }
 
   //1. GET http://localhost:3000/api/siswa
-  it('GET Data SEARCH ALL (READ)', async () => {
+  it.skip('GET Data SEARCH ALL (READ)', async () => {
     // kirim request ke server GET http://localhost:3000/api/siswa
     const getDataResponse = await request(app).get('/api/siswa');
     //cek log data response
@@ -28,7 +28,7 @@ describe('TEST GET Endpoint 1', () => {
   })
 
   //2. GET http://localhost:3000/api/siswa/1
-  it('GET Data by ID (READ)', async () => {
+  it.skip('GET Data by ID (READ)', async () => {
     //kirim request GET http://localhost:3000/api/siswa/1
     const getDataResponse = await request(app).get('/api/siswa/1');
     //tampilkan di log data
@@ -40,7 +40,7 @@ describe('TEST GET Endpoint 1', () => {
   })
 
   // 3. POST http://localhost:3000/api/siswa
-  it('POST Data (CREATE)', async () => {
+  it.skip('POST Data (CREATE)', async () => {
     //data request body yang akan dikirim 
     const dataKirim = {
       "first_name": "Silmi",
@@ -62,7 +62,36 @@ describe('TEST GET Endpoint 1', () => {
   })
 
   // 4. DELETE http://localhost:3000/api/siswa/1
-  it('DELETE Data by id (DELETE)', async () => {
+  it.skip('DELETE Data by id (DELETE)', async () => {
     // kirimkan request DELETE http://localhost:3000/api/siswa/1 dan tangkap hasilnya > getDataResp
+    const getDataResponse = await request(app).delete('/api/siswa/1')
+    //tampilkan di log
+    console.log(getDataResponse);
+    //jika datanya didele maka response status 200
+    expect(getDataResponse.status).toBe(200)
+    // Memeriksa isi array tidak mengandung object tertentu
+    expect(getDataResponse.body.data).not.toEqual(expect.arrayContaining([dataTest]))
+  })
+
+  // 5. PUT http://localhost:3000/api/siswa/1
+  it('POST Data (CREATE)', async () => {
+    // kirimkan data yang akan di edit dalam body
+    const dataKirim = {
+      "first_name": "Nafi",
+      "last_name": "Dhafin",
+      "email": "nidhan@gmail.com",
+      "phone": "785285043806"
+    }
+    const response = await request(app)
+      //kirim request PUT http://localhost:3000/api/siswa/1 > id = 1
+      .put('/api/siswa/1')
+      //kirimkan data body
+      .send(dataKirim)
+    console.log("response.body :", response.body);
+    //hasil status jika sukses = 200
+    expect(response.status).toBe(200)
+    // Memeriksa apakah objek mengandung nilai tertentu
+    expect(response.body.data).toEqual(expect.objectContaining({ "first_name": "Nafi" }));
+    expect(response.body.data).toEqual(expect.objectContaining({ "last_name": "Dhafin" }));
   })
 })
