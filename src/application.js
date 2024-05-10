@@ -2,6 +2,7 @@
 
 // a. Import library Framework express
 import express from "express";
+import { SiswaRouter } from "./siswa.js";
 
 // b. Membuat object app dari express function
 export const app = express();
@@ -44,4 +45,8 @@ router.post('/pasien', (req, res, next) => {
     data: req.body
   })
 })
+
+//4. Jalankan Router Siswa >> middleware router
+router.use("/siswa", SiswaRouter)
+
 app.use("/api", router)
