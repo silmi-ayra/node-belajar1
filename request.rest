@@ -1,6 +1,6 @@
 //request.rest
 
-### 1. Contoh : Endpoint API : GET '/'
+### 1. Contoh : Endpoint API : GET '/' 
 GET http://localhost:3000/
 
 ### 2. Contoh Endpoint API >> GET /oby
@@ -24,3 +24,28 @@ GET http://localhost:3000/api/siswa
 
 ### 7. READ : Endpoint : GET /api/siswa/:id
 GET http://localhost:3000/api/siswa/1
+
+### 8. CREATE : Endpoint : POST /api/siswa
+POST http://localhost:3000/api/siswa
+Content-Type: application/json
+
+{
+  "first_name": "Edy",
+"last_name": "Kholid",
+"email": "edy@gmail.com",
+"phone": "4579568902"
+}
+
+### 9. DELETE : Endpoint : DELETE /api/siswa/:id
+DELETE http://localhost:3000/api/siswa/10
+
+### 10. UPDATE : Endpoint : PUT /api/siswa/:id
+PUT http://localhost:3000/api/siswa/1
+Content-Type: application/json
+
+{
+"first_name": "Silmi",
+"last_name": "Ayra-Naifa",
+"email": "silmi@gmail.com",
+"phone": "78924952049"
+}

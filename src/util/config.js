@@ -6,7 +6,7 @@ export const config = {
     host: "localhost",
     user: "root",
     password: "760410",
-    database: "dbsiswa",
+    database: "dbsekolah",
     connectTimeout: 60000
   },
 };
