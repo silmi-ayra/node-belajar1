@@ -1228,6 +1228,58 @@ describe('TEST DATABASE', () => {
 
 ## 10. Utilitu untuk test
 
+```
+//test/util-test.js
+
+import { query } from "../src/util/db.js";
+
+//a. Delete data
+export const deleteAllTestSiswa = async () => {
+  await query('DELETE FROM tbsiswa')
+  console.log(`Delete All Test data`)
+}
+
+
+//b. Insert data 10
+export const insertManyTestSiswa = async () => {
+  let data = {}
+  for (let i = 0; i < 10; i++) {
+    data = {
+      first_name: `test ${i}`,
+      last_name: `test ${i}`,
+      email: `test${i}@gmail.com`,
+      phone: `080900000${i}`
+    }
+    let dataInsert = Object.values(data);
+    await query('INSERT INTO tbsiswa (first_name,last_name,email,phone) VALUES (?, ?, ?,?)', dataInsert);
+  }
+  console.log(`Insert Test 10 data`)
+
+}
+
+//c. Insert data 1
+export const insertTestSiswa = async () => {
+  const data = {
+    first_name: `test-Insert`,
+    last_name: `test-Insert`,
+    email: `testinsert@gmail.com`,
+    phone: `08090000000`
+  }
+  let dataInsert = Object.values(data);
+  await query('INSERT INTO tbsiswa (first_name,last_name,email,phone) VALUES (?, ?, ?,?)', dataInsert);
+  console.log(`Insert Test 1 data`)
+}
+
+//d. Select All data
+export const selectAllTestSiswa = async () => {
+  const rows = await query('SELECT * FROM tbsiswa ')
+  console.log(`Select All Test data`)
+  return rows
+}
+```
+
+## 11. POST Data (CREATE)
+
 - Perintah SQL:`'INSERT INTO tabel (kolom) VALUES (?)', [data kirim]`
 
 - API SPEC `//docs/siswa.md`
@@ -1328,5 +1380,695 @@ Content-Type: application/json
 - UNIT TEST
 
 ```
+//1. TEST CREATE
+describe('TEST CREATE', () => {
+  //Delete data
+  afterEach(async () => {
+    await deleteAllTestSiswa();
+  })
+  //3. POST http://localhost:3000/api/siswa
+  it('CREATE : Endpoint : POST /api/siswa', async () => {
+    //data obyek yang akan dikirim
+    const dataKirim = {
+      "first_name": "Edy",
+      "last_name": "Kholid",
+      "email": "edy@gmail.com",
+      "phone": "84394549570"
+    }
+    const getDataResponse = await request(app)
+      //a.send request post
+      .post('/api/siswa')
+      //kirim data body >> object dataKirim
+      .send(dataKirim);
+    expect(getDataResponse.status).toBe(201);
+    // Memeriksa bahwa respons adalah sebuah objek
+    expect(getDataResponse.body.data).toBeInstanceOf(Object);
+    // Memeriksa apakah objek mengandung nilai tertentu
+    expect(getDataResponse.body.data).toEqual(expect.objectContaining({ "first_name": "Edy" }));
+  })
+  it('should reject if request is invalid', async () => {
+    const result = await request(app)
+      .post('/api/siswa')
+      .send({
+        "first_name": "",
+        "last_name": "Kholid",
+        "email": "edy@gmail.com",
+        "phone": "84394549570"
+      });
+    expect(result.status).toBe(400);
+    //expect(result.body.errors).toBeDefined();
+  });
+})
+```
+
+## 12. GET Data All (READ)
+
+- Perintah SQL : `SELECT * FROMtabel`
+
+- API SPEC `//docs/siswa.md`
+
+Endpoint : GET /api/siswa
+
+Response Body Success :
+
+```
+{
+  "data": [
+    {
+      "id": 1,
+      "first_name": "Silmi",
+      "last_name": "Ayra",
+      "email": "silmi@gmail.com",
+      "phone": "19273821732"
+    },
+    {
+      "id": 2,
+      "first_name": "Nafi",
+      "last_name": "Dhafin",
+      "email": "afin@gmail.com",
+      "phone": "732893773009"
+    }
+  ]
+}
+```
+
+- ROUTING
+
+```
+//2. READ : Endpoint : GET /api/siswa/:id
+SiswaRouter.get('/', async (req, res, next) => {
+  //Validasi data
+  try {
+    //Perintah Query SQL ke database >> SELECT * FROM tabel
+    const rows = await query('SELECT * FROM tbsiswa')
+    //tampilkan di log
+    console.log(`GET DATA : ${JSON.stringify(rows)}`);
+    //kirim status 200 dan data >> array object rows
+    res.status(200).json({ 'data': rows });
+  } catch (error) {
+    console.log(`Error : ${error.message}`);
+  }
+})
+```
+
+- .REST
+
+```
+### 6. READ : Endpoint : GET /api/siswa
+GET http://localhost:3000/api/siswa
+```
+
+- UNIT TEST
+
+```
+//1. TEST READ ALL
+describe.skip('TEST READ ALL', () => {
+  //a. Insert data (10)
+  beforeEach(async () => {
+    await insertManyTestSiswa()
+  })
+  //d. Delete data
+  afterEach(async () => {
+    await deleteAllTestSiswa()
+  })
+
+  //1. READ : Endpoint : GET /api/siswa
+  it('READ : Endpoint : GET /api/siswa', async () => {
+    //a. send request get
+    const getDataResponse = await request(app).get('/api/siswa')
+    //log untuk melihat response
+    console.log(getDataResponse.body.data);
+    //b. jika sukses, reponse status adalah 200
+    expect(getDataResponse.status).toBe(200);
+    //c. jika sukses, reponse berupa array object berjumlah 10
+    expect(getDataResponse.body.data.length).toBe(10);
+  })
+})
+```
+
+## 13. GET Data /id (READ)
+
+- Perintah SQL : `'SELECT * FROM tabel WHERE kolom = ?', [data]`
+
+- API SPEC `//docs/siswa.md`
+
+READ : Endpoint : GET /api/siswa/:id
+
+Response Body Success :
+
+```
+{
+  "data": {
+    "id": 1,
+    "first_name": "Silmi",
+    "last_name": "Ayra",
+    "email": "silmi@gmail.com",
+    "phone": "8578923752375"
+  }
+}
+```
+
+Response Body Error :
+
+```
+{
+  "errors": "Siswa is not found"
+}
+```
+
+- ROUTING
+
+```
+//3. READ : Endpoint : GET /api/siswa/:id
+SiswaRouter.get('/:id', async (req, res, next) => {
+  //Validasi data id >> req.params.id
+  const { error } = getSiswaValidation.validate(req.params.id);
+  if (error) {
+    //console.log(`Validation Error: ${error.message}`);
+    return res
+      .status(400)
+      .json({
+        errors: error.details[0].message
+      })
+  }
+
+  try {
+    //ambil id dari request params
+    const { id } = req.params;
+    //Perintah Query SQL ke database >> 'SELECT * FROM tabel WHERE kolom = ?' , [data]
+    const rows = await query('SELECT * FROM tbsiswa WHERE id = ?', [id])
+    //tampilkan di log
+    console.log(`GET DATA: ${JSON.stringify(rows)}`, rows.length);
+    //check data jika ada
+    if (rows.length !== 1) {
+      return res
+        //status jika tidak ketemu adalah 204
+        //.status(204)
+        //pesan errors
+        .json({
+          errors: "Siswa is not found"
+        })
+    }
+    //kirim status 200 dan data >> array objec rows >> object rows ke 0
+    return res.status(200).json({ 'data': rows[0] })
+  } catch (error) {
+    console.log(`Error: ${error.message}`);
+    res.status(500).send('Internal Server Error');
+  }
+})
+```
+
+- .REST
+
+```
+### 7. READ : Endpoint : GET /api/siswa/:id
+GET http://localhost:3000/api/siswa/33
+
+### 7a. Validation READ : Endpoint : GET /api/siswa/:id
+//"value" must be a number
+GET http://localhost:3000/api/siswa/a
+
+### 8. CREATE : Endpoint : POST /api/siswa
+POST http://localhost:3000/api/siswa
+Content-Type: application/json
+
+{
+"first_name": "Edy",
+"last_name": "Kholid",
+"email": "edy@gmail.com",
+"phone": "84394549570"
+}
+
+### 8a. Validation CREATE : Endpoint : POST /api/siswa
+//"first_name" is not allowed to be empty
+POST http://localhost:3000/api/siswa
+Content-Type: application/json
+
+{
+"first_name": "",
+"last_name": "Kholid",
+"email": "edy@gmail.com",
+"phone": "84394549570"
+}
+```
+
+- UNIT TEST
+
+```
+//2. TEST READ by id
+describe('TEST READ by id', () => {
+  let idTest = 0
+  beforeEach(async () => {
+    //a. Hapus semua data
+    await deleteAllTestSiswa()
+    //b. Insert data
+    await insertTestSiswa()
+    //c. Select data dan cari id nya
+    const rows = await selectAllTestSiswa()
+    //gunakan id untuk test get by id
+    idTest = rows[0].id
+    console.log(idTest);
+  })
+  //Delete data
+  afterEach(async () => {
+    await deleteAllTestSiswa()
+  })
+  //2. GET http://localhost:3000/api/siswa/:idTest
+  it('READ : Endpoint : GET /api/siswa/:id', async () => {
+    //a. send request get menggunakan id yang sudah didapat saat select
+    const getDataResponse = await request(app).get(`/api/siswa/${idTest}`)
+    //b. jika sukses, response status adalah 200
+    expect(getDataResponse.status).toBe(200)
+    // Memeriksa apakah object mengandung nilai tertentu
+    expect(getDataResponse.body.data).toEqual(expect.objectContaining({ "first_name": "test-Insert" }))
+    expect(getDataResponse.body.data).toEqual(expect.objectContaining({ "last_name": "test-Insert" }))
+  })
+  //test validasi harusnya invalid (tidak valid)
+  it('should reject if request is invalid', async () => {
+    const result = await request(app)
+      //kirim get menggunakan angka
+      .get('/api/siswa/a')
+    //status akan menjadi 400
+    expect(result.status).toBe(400)
+    //errors akan terdefinisi dan di kirimkan alasan errornya
+    //expect(result.body.error).toBeDefined()
+  })
+  //test jika data yang di cari tidak ada
+  it('should reject if request is not exist', async () => {
+    const result = await request(app)
+      //kirim get menggunakn angka
+      .get('/api/siswa/1000')
+    //status akan menjadi 400
+    console.log("TIDAK KETEMU :", result.body);
+    expect(result.status).toBe(200);
+    //errors akan terdefinisi dan di kirimkan alasan errornya
+    //expect(result.body.errors).toBeDefined();
+  })
+})
+```
+
+## 14. DELETE Data /id (DELETE)
+
+- Perintah SQL : `'DELETE FROM tabel WHERE kolom = ?', [data]`
+
+- API SPEC `//docs/siswa.md`
+
+DELETE : Endpoint : DELETE /api/siswa/:id
+
+Response Body Success :
+
+```
+Deleted Successfully
+```
+
+- ROUTING
+
+```
+//4. DELETE : Endpoint : DELETE /api/siswa/:id
+SiswaRouter.delete('/:id', async (req, res, next) => {
+  //Validasi data id >> req.params.id
+  const { error } = delsiswaValidation.validate(req.params.id);
+  if (error) {
+    console.log(`Validation Error: ${error.message}`);
+    return res
+      .status(400)
+      .json({
+        errors: error.details[0].message
+      })
+  }
+  try {
+    //ambil id dari request params
+    const { id } = req.params;
+    //Perintah Query SQL ke database >> 'SELECT * FROM tabel WHERE kolom = ?' , [data]
+    const rows = await query('SELECT * FROM tbsiswa WHERE id = ?', [id])
+    //tampilkan di log
+    console.log(`GET DATA: ${JSON.stringify(rows)}`, rows.length);
+    //check data jika ada
+    if (rows.length !== 1) {
+      return res
+        //pesan errors
+        .json({
+          errors: "Siswa is not found"
+        })
+    }
+    //delete data
+    const result = await query('DELETE FROM tbsiswa WHERE id = ?', [id]);
+    let message = 'Error in delete';
+    if (result.affectedRows) {
+      message = 'Deleted Successfully';
+    }
+    console.log(`DELETE DATA: ${id}`);
+    res.status(200).send(message);
+  } catch (error) {
+    console.log(`Error: ${error.message}`);
+    res.status(500).send('Internal Server Error');
+  }
+})
+```
+
+- .REST
+
+```
+### 8. CREATE : Endpoint : POST /api/siswa
+POST http://localhost:3000/api/siswa
+Content-Type: application/json
+
+{
+"first_name": "Edy",
+"last_name": "Kholid",
+"email": "edy@gmail.com",
+"phone": "84394549570"
+}
+
+### 8a. Validation CREATE : Endpoint : POST /api/siswa
+//"first_name" is not allowed to be empty
+POST http://localhost:3000/api/siswa
+Content-Type: application/json
+
+{
+"first_name": "",
+"last_name": "Kholid",
+"email": "edy@gmail.com",
+"phone": "84394549570"
+}
+
+### 9. DELETE : Endpoint : DELETE /api/siswa/:id
+DELETE http://localhost:3000/api/siswa/60
+```
+
+- UNIT TEST
+
+```
+//4. TEST DELETE by id
+describe('TEST DELETE by id', () => {
+  let idTest = 0
+  beforeEach(async () => {
+    //a.Hapus semua data
+    await deleteAllTestSiswa();
+    //b.Insert data
+    await insertTestSiswa();
+    //c.Select data dan cari id nya
+    const rows = await selectAllTestSiswa();
+    //gunakan id untuk test get by id
+    idTest = rows[0].id
+    console.log(idTest);
+  })
+  //4. DELETE http://localhost:3000/api/siswa/1
+  it('DELETE : Endpoint : DELETE /api/siswa/:id', async () => {
+    //a.send request delete
+    const getDataResponse = await request(app).delete(`/api/siswa/${idTest}`);
+    //b. jika sukses, reponse status adalah 200
+    expect(getDataResponse.status).toBe(200);
+    //c. jika sukses, reponse berupa text adalah
+    expect(getDataResponse.text).toBe('Deleted Successfully');
+  })
+  it('should reject if request is invalid', async () => {
+    const result = await request(app)
+      .delete('/api/siswa/a')
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+  //test jika data yang delete tidak ada
+  it('should reject if request is not exist', async () => {
+    const result = await request(app)
+      //kirim get menggunakan angka
+      .get('/api/siswa/1000')
+    //status akan menjadi 400
+    console.log("TIDAK KETEMU :", result.body);
+    expect(result.status).toBe(200);
+    //errors akan terdefinisi dan di kirimkan alasan errornya
+    expect(result.body.errors).toBeDefined();
+  });
+})//4. TEST DELETE by id
+describe('TEST DELETE by id', () => {
+  let idTest = 0
+  beforeEach(async () => {
+    //a.Hapus semua data
+    await deleteAllTestSiswa();
+    //b.Insert data
+    await insertTestSiswa();
+    //c.Select data dan cari id nya
+    const rows = await selectAllTestSiswa();
+    //gunakan id untuk test get by id
+    idTest = rows[0].id
+    console.log(idTest);
+  })
+  //4. DELETE http://localhost:3000/api/siswa/1
+  it('DELETE : Endpoint : DELETE /api/siswa/:id', async () => {
+    //a.send request delete
+    const getDataResponse = await request(app).delete(`/api/siswa/${idTest}`);
+    //b. jika sukses, reponse status adalah 200
+    expect(getDataResponse.status).toBe(200);
+    //c. jika sukses, reponse berupa text adalah
+    expect(getDataResponse.text).toBe('Deleted Successfully');
+  })
+  it('should reject if request is invalid', async () => {
+    const result = await request(app)
+      .delete('/api/siswa/a')
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+  //test jika data yang delete tidak ada
+  it('should reject if request is not exist', async () => {
+    const result = await request(app)
+      //kirim get menggunakan angka
+      .get('/api/siswa/1000')
+    //status akan menjadi 400
+    console.log("TIDAK KETEMU :", result.body);
+    expect(result.status).toBe(200);
+    //errors akan terdefinisi dan di kirimkan alasan errornya
+    expect(result.body.errors).toBeDefined();
+  });
+})
+```
+
+## 15. PUT Data /id (UPDATE)
+
+- Perintah SQL : `'UPDATE tabel SET kolom = ?', [data]`
+
+- API SPEC `//docs/siswa.md`
+
+UPDATE : Endpoint : PUT /api/siswa/:id
+
+Response Body Succecc :
+
+```
+{
+  "data": {
+    "first_name": "Silmi",
+    "last_name": "Ayra-Naifa",
+    "email": "silmi@gmail.com",
+    "phone": "48567356790"
+  }
+}
+```
+
+- ROUTING
+
+```
+//5. UPDATE : Endpoint : PUT /api/siswa/:id
+SiswaRouter.put('/:id', async (req, res, next) => {
+  //Validasi data req.body dan req params.id
+  const dataIn = {
+    "id": req.params.id,
+    "first_name": req.body.first_name,
+    "last_name": req.body.last_name,
+    "email": req.body.email,
+    "phone": req.body.phone
+  }
+  const { error } = updateSiswaValidation.validate(dataIn);
+  if (error) {
+    console.log(`Validation Error: ${error.message}`);
+    return res
+      .status(400)
+      .json({
+        errors: error.details[0].message
+      })
+  }
+  try {
+    //ambil id dari request params
+    const { id } = req.params;
+    //Perintah Query SQL ke database >> 'SELECT * FROM tabel WHERE kolom = ?' , [data]
+    let rows = await query('SELECT * FROM tbsiswa WHERE id = ?', [id])
+    //tampilkan di log
+    console.log(`GET DATA: ${JSON.stringify(rows)}`, rows.length);
+    //check data jika ada
+    if (rows.length !== 1) {
+      return res
+        //pesan errors
+        .json({
+          errors: "Siswa is not found"
+        })
+    }
+    //update data dengan perintah query SQL >> UPDATE tabel SET kolom = value
+    await query('UPDATE tbsiswa set first_name = ?, last_name = ? WHERE id = ?', [dataIn.first_name, dataIn.last_name, dataIn.id])
+    //setelah selesai update ambil datanya kembali
+    rows = await query('SELECT * FROM tbsiswa WHERE id = ?', [id])
+    console.log(`PUT DATA: ${JSON.stringify(rows)}`);
+    //kirim response 201 dan response body json row ke 0
+    res.status(201).json({ data: rows[0] });
+  } catch (error) {
+    console.log(`Error: ${error.message}`);
+    res.status(500).send('Internal Server Error');
+  }
+})
+```
+
+- .REST
+
+```
+### 6. READ : Endpoint : GET /api/siswa
+GET http://localhost:3000/api/siswa
+
+### 7. READ : Endpoint : GET /api/siswa/:id
+GET http://localhost:3000/api/siswa/33
+
+### 7a. Validation READ : Endpoint : GET /api/siswa/:id
+//"value" must be a number
+GET http://localhost:3000/api/siswa/a
+
+### 8. CREATE : Endpoint : POST /api/siswa
+POST http://localhost:3000/api/siswa
+Content-Type: application/json
+
+{
+"first_name": "Edy",
+"last_name": "Kholid",
+"email": "edy@gmail.com",
+"phone": "84394549570"
+}
+
+### 8a. Validation CREATE : Endpoint : POST /api/siswa
+//"first_name" is not allowed to be empty
+POST http://localhost:3000/api/siswa
+Content-Type: application/json
+
+{
+"first_name": "",
+"last_name": "Kholid",
+"email": "edy@gmail.com",
+"phone": "84394549570"
+}
+
+### 9. DELETE : Endpoint : DELETE /api/siswa/:id
+DELETE http://localhost:3000/api/siswa/60
+
+### 9a. Vvalidation DELETE : Endpoint : DELETE /api/siswa/:id
+//"value" must be a number
+DELETE http://localhost:3000/api/siswa/a
+
+### 10. UPDATE : Endpoint : PUT /api/siswa/:id
+PUT http://localhost:3000/api/siswa/77
+Content-Type: application/json
+
+{
+"first_name": "Silmi",
+"last_name": "Ayra-Naifa",
+"email": "silmi@gmail.com",
+"phone": "48567356790"
+}
+
+### 10a. Validation UPDATE : Endpoint : PUT /api/siswa/:id
+//"id" must be a number
+PUT http://localhost:3000/api/siswa/a
+Content-Type: application/json
+
+{
+"first_name": "Silmi",
+"last_name": "Ayra-Naifa",
+"email": "silmi@gmail.com",
+"phone": "48567356790"
+}
+
+### 10b. Validation UPDATE : Endpoint : PUT /api/siswa/:id
+//"first_name" is not allowed to be empty
+PUT http://localhost:3000/api/siswa/1
+Content-Type: application/json
+
+{
+"first_name": "",
+"last_name": "Ayra-Naifa",
+"email": "silmi@gmail.com",
+"phone": "48567356790"
+}
+```
+
+- UNIT TEST
+
+```
+//5. TEST UPDTAE by id
+describe('TEST UPDTAE by id', () => {
+  let idTest = 0
+  beforeEach(async () => {
+    //a. Hapus semua data
+    await deleteAllTestSiswa()
+    //b. Insert data
+    await insertTestSiswa()
+    //c. Select data dan ceri id nya
+    const rows = await selectAllTestSiswa()
+    //gunakan id untuk test get bt id
+    idTest = rows[0].id
+    console.log(idTest);
+  })
+  //Delete data
+  afterEach(async () => {
+    await deleteAllTestSiswa();
+  })
+  //5. PUT http://localhost:3000/api/siswa/1
+  it('UPDATE : Endpoint : PUT /api/siswa/:id', async () => {
+    //data obyek yang akan dikirim
+    const dataKirim = {
+      "first_name": "Silmi",
+      "last_name": "Ayra-Naifa",
+      "email": "silmi@gmail.com",
+      "phone": "48567356790"
+    }
+    const getDataResponse = await request(app)
+      //a.send request put
+      .put(`/api/siswa/${idTest}`)
+      //kirim data body >> object dataKirim
+      .send(dataKirim);
+    //b. jika sukses, reponse status adalah 201
+    expect(getDataResponse.status).toBe(201);
+    // Memeriksa apakah objek mengandung nilai tertentu
+    expect(getDataResponse.body.data).toEqual(expect.objectContaining({ "first_name": "Silmi" }));
+    expect(getDataResponse.body.data).toEqual(expect.objectContaining({ "last_name": "Ayra-Naifa" }));
+  })
+  it('should reject if request is invalid', async () => {
+    const result = await request(app)
+      .put(`/api/siswa/${idTest}`)
+      .send({
+        "first_name": "",
+        "last_name": "",
+        "email": "edy@gmail.com",
+        "phone": "84394549570"
+      });
+    expect(result.status).toBe(400);
+    //expect(result.body.errors).toBeDefined();
+  });
+  //test jika data yang delete tidak ada
+  it('should reject if request is not exist', async () => {
+    const result = await request(app)
+      //kirim get menggunakan angka
+      .put('/api/siswa/1000')
+    //status akan menjadi 400
+    console.log("TIDAK KETEMU :", result.body);
+    expect(result.status).toBe(400)
+    //errors akan terdefinisi dan dikirimkan alasan errornya
+  })
+  it('should reject if request is invalid', async () => {
+    const result = await request(app)
+      .put('/api/siswa/a')
+    expect(result.status).toBe(400)
+    //expect(result.body.errors).toBeDefined();
+  })
+})
+```
+
+## 16. KESIMPULAN TEST
+
+```
+PASS test/siswa.test.js (5.801 s)
+ TEST READ ALL
 
 ```

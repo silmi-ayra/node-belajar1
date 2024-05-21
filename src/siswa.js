@@ -1,11 +1,12 @@
 //src/siswa.js
 import express from "express";
 import { createSiswaValidation, delsiswaValidation, getSiswaValidation, updateSiswaValidation } from "./siswa-validation.js";
+import { query } from "./util/db.js";
 
 export const SiswaRouter = express.Router();
 
 // 1. READ : Endpoint : POST /api/siswa
-SiswaRouter.get('/', async (req, res, next) => {
+SiswaRouter.post('/', async (req, res, next) => {
   //Validasi data req.body
   const { error } = createSiswaValidation.validate(req.body);
   if (error) {
@@ -19,9 +20,9 @@ SiswaRouter.get('/', async (req, res, next) => {
 
   try {
     //ambil data yang akan disimpan dari request body
-    const { firstName, lastName, email, phone } = req.body;
+    const { first_name, last_name, email, phone } = req.body;
     //kirim query SQL perintah simpan >> INSERT INTO tabel (kolom) VALUES (?)', [data kirim]
-    const result = await query('INSERT INTO tbsiswa (firstName,lastName,email,phone) VALUES (?,?,?,?)', [firstName, lastName, email, phone])
+    const result = await query('INSERT INTO tbsiswa (first_name,last_name,email,phone) VALUES (?,?,?,?)', [first_name, last_name, email, phone])
     //ambil data hasil query berupa ID insert
     const id = result.insertId
     //console.log(result.insertId)
@@ -38,44 +39,102 @@ SiswaRouter.get('/', async (req, res, next) => {
 })
 
 //2. READ : Endpoint : GET /api/siswa/:id
-SiswaRouter.get('/:id', (req, res, next) => {
-  //Validasi data id >> req.params.id
-  const { error } = getSiswaValidation.validate(req.params.id)
-  if (error) {
-    console.log(`Validation Error: ${error.message}`);
-    return res.status(400).send(error.details[0].message)
+SiswaRouter.get('/', async (req, res, next) => {
+  //Validasi data 
+  try {
+    //Perintah Query SQL ke database >> SELECT * FROM tabel
+    const rows = await query('SELECT * FROM tbsiswa')
+    //tampilkan di log
+    console.log(`GET DATA : ${JSON.stringify(rows)}`);
+    //kirim status 200 dan data >> array object rows
+    res.status(200).json({ 'data': rows });
+  } catch (error) {
+    console.log(`Error : ${error.message}`);
   }
-  //SELECT * FROM tabel WHERE kolom = yang di cari
-  res.send("GET SISWA")
 })
 
-//3. CREATE : Endpoint : POST /api/siswa
-SiswaRouter.post('/', (req, res, next) => {
-  // Validasi data req.body
-  const { error } = createSiswaValidation.validate(req.body)
+//3. READ : Endpoint : GET /api/siswa/:id
+SiswaRouter.get('/:id', async (req, res, next) => {
+  //Validasi data id >> req.params.id
+  const { error } = getSiswaValidation.validate(req.params.id);
   if (error) {
-    console.log(`Validation Error: ${error.message}`);
-    return res.status(400).send(error.details[0].message)
+    //console.log(`Validation Error: ${error.message}`);
+    return res
+      .status(400)
+      .json({
+        errors: error.details[0].message
+      })
   }
-  //'INSERT INTO tabel (kolom) VALUES (?)', [data kirim]
-  res.send("ADD NEW SISWA")
+
+  try {
+    //ambil id dari request params
+    const { id } = req.params;
+    //Perintah Query SQL ke database >> 'SELECT * FROM tabel WHERE kolom = ?' , [data]
+    const rows = await query('SELECT * FROM tbsiswa WHERE id = ?', [id])
+    //tampilkan di log
+    console.log(`GET DATA: ${JSON.stringify(rows)}`, rows.length);
+    //check data jika ada
+    if (rows.length !== 1) {
+      return res
+        //status jika tidak ketemu adalah 204
+        //.status(204)
+        //pesan errors
+        .json({
+          errors: "Siswa is not found"
+        })
+    }
+    //kirim status 200 dan data >> array objec rows >> object rows ke 0
+    return res.status(200).json({ 'data': rows[0] })
+  } catch (error) {
+    console.log(`Error: ${error.message}`);
+    res.status(500).send('Internal Server Error');
+  }
 })
 
 //4. DELETE : Endpoint : DELETE /api/siswa/:id
-SiswaRouter.delete('/:id', (req, res, next) => {
-  // Validasi data id >> req.params.id
-  const { error } = delsiswaValidation.validate(req.params.id)
+SiswaRouter.delete('/:id', async (req, res, next) => {
+  //Validasi data id >> req.params.id
+  const { error } = delsiswaValidation.validate(req.params.id);
   if (error) {
     console.log(`Validation Error: ${error.message}`);
-    return res.status(400).send(error.details[0].message)
+    return res
+      .status(400)
+      .json({
+        errors: error.details[0].message
+      })
   }
-  //DELETE FROM tabel WHERE kolom = ?', [data]
-  res.send("DELETE SISWA")
+  try {
+    //ambil id dari request params
+    const { id } = req.params;
+    //Perintah Query SQL ke database >> 'SELECT * FROM tabel WHERE kolom = ?' , [data]
+    const rows = await query('SELECT * FROM tbsiswa WHERE id = ?', [id])
+    //tampilkan di log
+    console.log(`GET DATA: ${JSON.stringify(rows)}`, rows.length);
+    //check data jika ada
+    if (rows.length !== 1) {
+      return res
+        //pesan errors
+        .json({
+          errors: "Siswa is not found"
+        })
+    }
+    //delete data
+    const result = await query('DELETE FROM tbsiswa WHERE id = ?', [id]);
+    let message = 'Error in delete';
+    if (result.affectedRows) {
+      message = 'Deleted Successfully';
+    }
+    console.log(`DELETE DATA: ${id}`);
+    res.status(200).send(message);
+  } catch (error) {
+    console.log(`Error: ${error.message}`);
+    res.status(500).send('Internal Server Error');
+  }
 })
 
 //5. UPDATE : Endpoint : PUT /api/siswa/:id
-SiswaRouter.put('/:id', (req, res, next) => {
-  //Validasi data req.body dan req.params.id
+SiswaRouter.put('/:id', async (req, res, next) => {
+  //Validasi data req.body dan req params.id
   const dataIn = {
     "id": req.params.id,
     "first_name": req.body.first_name,
@@ -86,8 +145,36 @@ SiswaRouter.put('/:id', (req, res, next) => {
   const { error } = updateSiswaValidation.validate(dataIn);
   if (error) {
     console.log(`Validation Error: ${error.message}`);
-    return res.status(400).send(error.details[0].message);
+    return res
+      .status(400)
+      .json({
+        errors: error.details[0].message
+      })
   }
-  //UPDATE tabel SET kolom=?', [data]
-  res.send("UPDATE SISWA")
+  try {
+    //ambil id dari request params
+    const { id } = req.params;
+    //Perintah Query SQL ke database >> 'SELECT * FROM tabel WHERE kolom = ?' , [data]
+    let rows = await query('SELECT * FROM tbsiswa WHERE id = ?', [id])
+    //tampilkan di log
+    console.log(`GET DATA: ${JSON.stringify(rows)}`, rows.length);
+    //check data jika ada
+    if (rows.length !== 1) {
+      return res
+        //pesan errors
+        .json({
+          errors: "Siswa is not found"
+        })
+    }
+    //update data dengan perintah query SQL >> UPDATE tabel SET kolom = value
+    await query('UPDATE tbsiswa set first_name = ?, last_name = ? WHERE id = ?', [dataIn.first_name, dataIn.last_name, dataIn.id])
+    //setelah selesai update ambil datanya kembali
+    rows = await query('SELECT * FROM tbsiswa WHERE id = ?', [id])
+    console.log(`PUT DATA: ${JSON.stringify(rows)}`);
+    //kirim response 201 dan response body json row ke 0
+    res.status(201).json({ data: rows[0] });
+  } catch (error) {
+    console.log(`Error: ${error.message}`);
+    res.status(500).send('Internal Server Error');
+  }
 })
